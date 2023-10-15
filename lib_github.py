@@ -11,8 +11,13 @@ class Utils_Github:
         self.__github_org = os.environ.get('GITHUB_ORG')
         
     def get_list_repos(self):
-        # TODO
-        # Only needed a list of repos, only the name of the repos
         repository_list = self.github.list_repositories_all(self.__github_org)
+        return_list = [
+            {
+                'repo_name': item['name'],
+            }
+            for item in repository_list
+        ]
+        return return_list
 
 

@@ -1,7 +1,7 @@
 import os, json
 from atlassian import Jira
 
-class JiraLib(Jira):
+class Utils_Jira():
     
     def __init__(self):
         self.__url = os.environ.get("JIRA_URL")
@@ -14,9 +14,29 @@ class JiraLib(Jira):
         )
         self.__jira_project = os.environ.get("JIRA_PROJECT")
         
+    def __fetch_all_results(self):
+            all_issues = []
+            start_at = 0
+            max_results = 50
+            while True:
+                response = self.jira.jql(f"project = {self.__jira_project}", start=start_at)
+                issues = response.get('issues', [])
+                all_issues.extend(issues)
+                start_at += max_results
+                if len(all_issues) >= response['total']:
+                    break
+            return all_issues
+        
     def get_repository_list(self):
-        # TODO
-        # Only needed a list of repos, name, ticket id, ticket status
-        repository_list = self.jira.jql("project = " + self.__jira_project)
-    
+        repository_list = self.__fetch_all_results()
+        return_list = [
+            {
+                'repo_name': item['fields']['summary'],
+                'ticket_id': item['key'],
+                'ticket_status': item['fields']['status']['name']
+            }
+            for item in repository_list
+        ]
+        
+        return return_list
     
